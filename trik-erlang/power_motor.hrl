@@ -1,0 +1,4 @@
+-define(M1, 0).
+-define(M2, 1).
+-define(M3, 2).
+-define(M4, 3).

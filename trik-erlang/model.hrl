@@ -1,0 +1,1 @@
+-record(model, {button_pad_pid, accelerometer_pid, gyroscope_pid}).
