@@ -6,6 +6,9 @@
 #include <string.h>
 
 
+char USB_DEVFILE1[] = "/dev/ttyACM0";
+char USB_DEVFILE2[] = "/dev/ttyACM1";
+
 int hello()
 {
     printf("%s\n", "hello");
@@ -68,11 +71,43 @@ static ERL_NIF_TERM fwrite_string_nif(ErlNifEnv* env, int argc, const ERL_NIF_TE
     return enif_make_int(env, 0);
 }
 
+static ERL_NIF_TERM usb_protocol_write_reg_nif(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
+{
+    char filepath[512], data[128];
+    FILE *f;
+    int devaddr, regaddr, regval, funcnum = 0x03, crc;
+    if (!enif_get_int(env, argv[0], &devaddr)) {
+        return enif_make_badarg(env);
+    }
+    if (!enif_get_int(env, argv[1], &regaddr)) {
+        return enif_make_badarg(env);
+    }
+    if (!enif_get_int(env, argv[2], &regval)) {
+        return enif_make_badarg(env);
+    }
+
+    crc = 
+        (
+            0xFF - 
+                (devaddr + funcnum + regaddr + 
+                (regval & 0xFF) + 
+                ((regval >> 8) & 0xFF) + 
+                ((regval >> 16) & 0xFF) + 
+                ((regval >> 24) & 0xFF)) 
+            + 1
+        ) & 0xFF;
+    f = fopen(USB_DEVFILE1, "wb");  
+    fprintf(f, ":%02X%02X%02X%08X%02X\n", devaddr, funcnum, regaddr, regval, crc);
+    fclose(f);
+    return enif_make_int(env, 0);
+}
+
 static ErlNifFunc nif_funcs[] = {
     {"hello", 0, hello_nif},
     {"world", 1, world_nif},
     {"echo_string", 1, echo_string_nif},
-    {"fwrite_string", 2, fwrite_string_nif}
+    {"fwrite_string", 2, fwrite_string_nif},
+    {"usb_protocol_write_reg", 3, usb_protocol_write_reg_nif}
 };
 
 ERL_NIF_INIT(native, nif_funcs, NULL, NULL, NULL, NULL)

@@ -15,11 +15,13 @@ write_reg(Devaddr, Regaddr, Regval) ->
             ) + 1
         ) band ?HEX_FF,
     %FmtStr = "echo \":~2.16.0B~2.16.0B~2.16.0B~8.16.0B~2.16.0B\" > " ?USB_DEVFILE1,
-    FmtStr = ":~2.16.0B~2.16.0B~2.16.0B~8.16.0B~2.16.0B",
+    FmtStr = ":~2.16.0B~2.16.0B~2.16.0B~8.16.0B~2.16.0B~n",
     Stmt = lists:flatten(io_lib:fwrite(FmtStr, [Devaddr, Funcnum, Regaddr, Regval, Crc])),
 
-    %Stmt = ":%02X%02X%02X%08X%02X\n" % (devaddr, funcnum, regaddr, regval, crc)
+    %Stmt = ":%02X%02X%02X%08X%02X\n" % (devaddr, funcnum, regaddr, regval, crc)    
+    
     %io:format(Stmt ++ "~n", []),
+
     %os:cmd(Stmt).
     native:fwrite_string(?USB_DEVFILE1, Stmt).
 
