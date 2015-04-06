@@ -40,6 +40,16 @@ static ERL_NIF_TERM world_nif(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[
     return enif_make_int(env, ret);
 }
 
+static ERL_NIF_TERM echo_string_nif(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
+{
+    char data[512];
+    if (!enif_get_string(env, argv[0], data, 512, ERL_NIF_LATIN1)) {
+        return enif_make_badarg(env);
+    }
+    puts(data);
+    return enif_make_int(env, 0);
+}
+
 static ERL_NIF_TERM fwrite_string_nif(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
 {
     char filepath[512], data[128];
@@ -55,11 +65,13 @@ static ERL_NIF_TERM fwrite_string_nif(ErlNifEnv* env, int argc, const ERL_NIF_TE
     f = fopen(filepath, "wb");  
     fwrite(data, 1, datalen, f);
     fclose(f);
+    return enif_make_int(env, 0);
 }
 
 static ErlNifFunc nif_funcs[] = {
     {"hello", 0, hello_nif},
     {"world", 1, world_nif},
+    {"echo_string", 1, echo_string_nif},
     {"fwrite_string", 2, fwrite_string_nif}
 };
 
